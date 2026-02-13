@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
+const  API_BASE = "https://invoice-generator-backend-5sfh.onrender.com";
 export default function Auth({ isLogin }) {
   const navigate = useNavigate();
   
@@ -34,7 +34,7 @@ export default function Auth({ isLogin }) {
       // Choose the right endpoint based on isLogin prop
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/signup';
       
-      const response = await fetch(`http://127.0.0.1:5000${endpoint}`, {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -58,7 +58,7 @@ export default function Auth({ isLogin }) {
   } catch (err) {
     setError("Backend is not running! Start your server.js");
   }
-};
+};``
 
 const handleForgotPassword = async () => {
   const email = prompt("Please enter your registered email address:");
@@ -66,7 +66,7 @@ const handleForgotPassword = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch('http://127.0.0.1:5000/api/auth/forgot-password', {
+    const response = await fetch('${API_BASE}/api/auth/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
