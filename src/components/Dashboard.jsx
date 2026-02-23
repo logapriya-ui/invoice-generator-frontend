@@ -1,196 +1,197 @@
-import React, { useState, useEffect } from 'react'; // Added useEffect
+import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Plus, Download, Trash2, FileText, ChevronDown, 
-  FileSpreadsheet, User, Calendar, IndianRupee 
-} from 'lucide-react'; // Added FileSpreadsheet and others
+  Plus, Trash2, FileText, ChevronDown, 
+  FileSpreadsheet, IndianRupee, Edit3 
+} from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx'; // Make sure this is here
-import { useRef } from 'react'; // Add useRef to the react import
+import * as XLSX from 'xlsx';
 
 export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // --- FETCH DATA FROM MONGODB ---
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState(null);
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  
+  // Use environment variable for production, fallback to local for dev
+  const API_BASE = import.meta.env.VITE_API_BASE;
+
+  // --- FETCH DATA ---
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const res = await fetch('http://localhost:5000/api/invoices');
-        const data = await res.json();
-        // Sort by newest first
-        setHistory(data.reverse());
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-        setLoading(false);
-      }
-    };
     fetchDashboardData();
   }, []);
 
+  const fetchDashboardData = async () => {
+    const user = JSON.parse(localStorage.getItem('user')); // Get user from login
+    const email = user?.email;
+  
+  try {
+      const res = await fetch(`${API_BASE}/api/invoices?email=${email}`);
+      const data = await res.json();
+      // Assume backend handles sorting, or use .reverse() if needed
+      setHistory(data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setLoading(false);
+    }
+  };
+
+  // --- DELETE LOGIC ---
+  const handleDelete = async (id, e) => {
+    e.stopPropagation(); // Prevent row click trigger
+    if (!window.confirm("Delete this document permanently?")) return;
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/invoices/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setHistory(prev => prev.filter(inv => inv._id !== id));
+      }
+    } catch (err) {
+      alert("Delete failed. Check backend.");
+    }
+  };
+
+  // --- EDIT LOGIC ---
+  const openEditModal = (invoice, e) => {
+    e.stopPropagation();
+    setEditingInvoice({ ...invoice }); // Create a copy so we don't edit live data
+    setIsEditModalOpen(true);
+  };
+  const saveEdit = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/invoices/${editingInvoice._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingInvoice)
+      });
+
+      if (res.ok) {
+        // Update local state to reflect changes
+        setHistory(prev => prev.map(inv => inv._id === editingInvoice._id ? editingInvoice : inv));
+        setIsEditModalOpen(false);
+        alert("✅ Invoice Updated!");
+      }
+    } catch (err) {
+      alert("Error updating invoice");
+    }
+  };
+
+  // --- STATUS TOGGLE ---
+  const handleStatusUpdate = async (id, currentStatus, e) => {
+    e.stopPropagation();
+    const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid'; // Toggle locally
+    
+    try {
+        const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }) //
+        });
+
+        if (res.ok) {
+            // Update the history state immediately so the UI changes
+            setHistory(prev => prev.map(inv => 
+                inv._id === id ? { ...inv, status: newStatus } : inv
+            ));
+        }
+    } catch (err) {
+        console.error("Status Update Error:", err); //
+    }
+};
+  // --- EXCEL & NAVIGATION ---
   const handleCreate = (type) => {
     navigate('/generator', { state: { type: type } });
     setShowDropdown(false);
   };
 
-const fileInputRef = useRef(null);
-
-const handleImportExcel = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    const data = new Uint8Array(event.target.result);
-    const workbook = XLSX.read(data, { type: 'array' });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet);
-
-    console.log("Imported Data:", jsonData);
-    
-    // Logic: Navigate to generator with the first row of data
-    if (jsonData.length > 0) {
-      alert("✅ Data parsed! Sending to Invoice Generator...");
-      navigate('/generator', { state: { importedData: jsonData[0] } });
-    }
+  const handleImportExcel = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const data = new Uint8Array(event.target.result);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(sheet);
+      if (jsonData.length > 0) {
+        navigate('/generator', { state: { importedData: jsonData[0] } });
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
-  reader.readAsArrayBuffer(file);
-};
 
-const handleStatusUpdate = async (id, currentStatus) => {
-  const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid';
-  
-  // Replace this URL with your Render URL when you deploy!
-  const API_BASE = "http://localhost:5000"; 
-
-  try {
-    const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    });
-
-    if (res.ok) {
-      // Update the local state so the UI changes immediately
-      setHistory(prev => prev.map(inv => 
-        inv._id === id ? { ...inv, status: newStatus } : inv
-      ));
-    } else {
-      alert("Failed to update status on the server.");
-    }
-  } catch (err) {
-    console.error("Network Error:", err);
-    alert("Check your backend connection!");
-  }
+  const handleLogout = () => {
+    localStorage.removeItem('user'); // Clear user data
+    navigate('/login'); // Redirect to login page
 };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      
-      {/* LEFT SIDEBAR: ACTIONS */}
       <aside className="w-full md:w-80 p-8 border-r bg-white shadow-sm h-screen sticky top-0">
         <div className="mb-10">
-           <h1 className="text-2xl font-black text-blue-900">PRO-INVOICE</h1>
-           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
+          <h1 className="text-2xl font-black text-blue-900">PRO-INVOICE</h1>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
         </div>
-
-        <div className="space-y-4">
-          <div className="w-full">
-  {/* Hidden File Input */}
-  <input 
-    type="file" 
-    ref={fileInputRef} 
-    onChange={handleImportExcel} 
-    accept=".xlsx, .xls, .csv" 
-    className="hidden" 
-  />
-
-  {/* Real Button */}
-  <button 
-    onClick={() => fileInputRef.current.click()}
-    className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 rounded-xl text-xs font-black text-slate-600 transition-all border-2 border-transparent hover:border-blue-200"
-  >
-    <FileSpreadsheet size={18} /> 
-    IMPORT FROM EXCEL
-  </button>
+        <div className="mt-auto pt-10">
+    <button 
+        onClick={handleLogout}
+        className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-black transition-all"
+    >
+        LOGOUT ACCOUNT
+    </button>
 </div>
 
+        <div className="space-y-4">
+          <input type="file" ref={fileInputRef} onChange={handleImportExcel} accept=".xlsx, .xls, .csv" className="hidden" />
+          <button onClick={() => fileInputRef.current.click()} className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 rounded-xl text-xs font-black text-slate-600 transition-all">
+            <FileSpreadsheet size={18} /> IMPORT FROM EXCEL
+          </button>
+
           <div className="relative">
-            <button 
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="w-full bg-blue-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg hover:bg-blue-800 transition-all"
-            >
+            <button onClick={() => setShowDropdown(!showDropdown)} className="w-full bg-blue-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg">
               <Plus size={20} /> NEW DOCUMENT <ChevronDown size={18} />
             </button>
-
             {showDropdown && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-white shadow-2xl rounded-2xl border p-2 z-50 animate-in fade-in slide-in-from-top-2">
-                 <button onClick={() => handleCreate('Invoice')} className="w-full text-left p-3 hover:bg-blue-50 rounded-lg flex items-center gap-3 text-sm font-bold text-slate-700">
-                  <FileText className="text-blue-500" size={18} /> Invoice
-                </button>
-                <button onClick={() => handleCreate('Quote')} className="w-full text-left p-3 hover:bg-blue-50 rounded-lg flex items-center gap-3 text-sm font-bold text-slate-700">
-                  <FileText className="text-emerald-500" size={18} /> Quote 
-                </button>
-                <button onClick={() => handleCreate('Credit Note')} className="w-full text-left p-3 hover:bg-blue-50 rounded-lg flex items-center gap-3 text-sm font-bold text-slate-700">
-                  <FileText className="text-red-500" size={18} /> Credit Note
-                </button>
+              <div className="absolute top-full left-0 w-full mt-2 bg-white shadow-2xl rounded-2xl border p-2 z-50">
+                {['Invoice', 'Quote', 'Credit Note'].map(type => (
+                  <button key={type} onClick={() => handleCreate(type)} className="w-full text-left p-3 hover:bg-blue-50 rounded-lg text-sm font-bold text-slate-700 flex items-center gap-3">
+                    <FileText size={16} className="text-blue-500" /> {type}
+                  </button>
+                ))}
               </div>
             )}
           </div>
         </div>
       </aside>
 
-      {/* RIGHT SIDE: CONTENT & HISTORY */}
       <main className="flex-1 p-6 md:p-12 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-               <h2 className="text-4xl font-black text-slate-900 tracking-tight">My Documents</h2>
-               <p className="text-slate-500 font-medium">Manage and track your recent billings</p>
-            </div>
-          </div>
+          <h2 className="text-4xl font-black text-slate-900 mb-8">My Documents</h2>
           
-          {/* STATS CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            <div className="bg-blue-600 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden group">
-              <div className="relative z-10">
-                <p className="text-xs font-bold opacity-80 uppercase tracking-widest">Total Generated</p>
-                <h3 className="text-4xl font-black mt-1">{history.length}</h3>
-              </div>
-              <FileText className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform" />
+            <div className="bg-blue-600 p-8 rounded-3xl text-white relative overflow-hidden group">
+              <p className="text-xs font-bold opacity-80 uppercase">Total Documents</p>
+              <h3 className="text-4xl font-black mt-1">{history.length}</h3>
+              <FileText className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10" />
             </div>
-            
-            <div className="bg-emerald-500 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden group">
-              <div className="relative z-10">
-                <p className="text-xs font-bold opacity-80 uppercase tracking-widest">Total Revenue</p>
-                <h3 className="text-4xl font-black mt-1">₹{history.reduce((acc, curr) => acc + (curr.total || 0), 0).toLocaleString()}</h3>
-              </div>
-              <IndianRupee className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10 group-hover:scale-110 transition-transform" />
+            <div className="bg-emerald-500 p-8 rounded-3xl text-white relative overflow-hidden group">
+              <p className="text-xs font-bold opacity-80 uppercase">Total Revenue</p>
+              <h3 className="text-4xl font-black mt-1">₹{history.reduce((acc, curr) => acc + (curr.total || 0), 0).toLocaleString()}</h3>
+              <IndianRupee className="absolute -right-4 -bottom-4 w-32 h-32 opacity-10" />
             </div>
           </div>
 
-          {/* DOCUMENT LIST */}
           <div className="bg-white rounded-3xl border-2 border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-               <h4 className="font-black text-slate-700 text-sm uppercase tracking-widest">Recent Transactions</h4>
-               <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">{history.length} Records</span>
+            <div className="p-6 border-b bg-slate-50/50 flex justify-between items-center">
+              <h4 className="font-black text-slate-700 text-sm uppercase">Recent Transactions</h4>
             </div>
 
             {loading ? (
-              <div className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">
-                Fetching records...
-              </div>
-            ) : history.length === 0 ? (
-              <div className="p-20 text-center">
-                <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="text-slate-300" size={32} />
-                </div>
-                <p className="text-slate-400 font-bold">No documents found in database.</p>
-                <p className="text-xs text-slate-300 uppercase mt-1">Create your first invoice to see it here</p>
-              </div>
+              <div className="p-20 text-center text-slate-400 font-bold animate-pulse">LOADING...</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
@@ -199,32 +200,38 @@ const handleStatusUpdate = async (id, currentStatus) => {
                       <th className="px-6 py-4">Status</th>
                       <th className="px-6 py-4">Doc #</th>
                       <th className="px-6 py-4">Client</th>
-                      <th className="px-6 py-4">Date</th>
                       <th className="px-6 py-4 text-right">Amount</th>
+                      <th className="px-6 py-4 text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {history.map((doc) => (
-                      <tr key={doc._id} className="hover:bg-blue-50/50 transition-colors group cursor-pointer">
+                      <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
-  <button 
-  onClick={(e) => {
-    e.stopPropagation();
-    handleStatusUpdate(doc._id, doc.status);
-  }}
-  className={`px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
-    doc.status === 'Paid' 
-      ? 'bg-emerald-100 text-emerald-600' 
-      : 'bg-red-100 text-red-600 border border-red-200'
-  }`}
->
-  {doc.status || 'Unpaid'}
-</button>
-</td>
+                          <button 
+                            onClick={(e) => handleStatusUpdate(doc._id, doc.status, e)}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
+                              doc.status === 'Paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 border border-red-200'
+                            }`}
+                          >
+                            {doc.status || 'Unpaid'}
+                          </button>
+                        </td>
                         <td className="px-6 py-4 font-black text-blue-900 text-sm">#{doc.docNumber}</td>
                         <td className="px-6 py-4 text-sm font-bold text-slate-600">{doc.clientName}</td>
-                        <td className="px-6 py-4 text-sm text-slate-400">{new Date(doc.date).toLocaleDateString()}</td>
-                        <td className="px-6 py-4 text-right font-black text-slate-900">{doc.currency}{doc.total?.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-right font-black text-slate-900">
+                          {doc.currency}{doc.total?.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-3">
+                            <button onClick={(e) => openEditModal(doc, e)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                              <Edit3 size={18} />
+                            </button>
+                            <button onClick={(e) => handleDelete(doc._id, e)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -233,6 +240,41 @@ const handleStatusUpdate = async (id, currentStatus) => {
             )}
           </div>
         </div>
+
+        {/* --- EDIT MODAL --- */}
+        {isEditModalOpen && editingInvoice && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+              <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+                <h3 className="font-black text-slate-800">Edit Document</h3>
+                <button onClick={() => setIsEditModalOpen(false)}><X size={20}/></button>
+              </div>
+              <div className="p-8 space-y-4">
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-400">Client Name</label>
+                  <input 
+                    className="w-full mt-1 p-3 bg-slate-100 rounded-xl font-bold focus:ring-2 ring-blue-500 outline-none"
+                    value={editingInvoice.clientName}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, clientName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black uppercase text-slate-400">Total Amount</label>
+                  <input 
+                    type="number"
+                    className="w-full mt-1 p-3 bg-slate-100 rounded-xl font-bold focus:ring-2 ring-blue-500 outline-none"
+                    value={editingInvoice.total}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, total: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="pt-4 flex gap-3">
+                  <button onClick={() => setIsEditModalOpen(false)} className="flex-1 py-3 font-bold text-slate-500">Cancel</button>
+                  <button onClick={saveEdit} className="flex-1 py-3 bg-blue-900 text-white rounded-xl font-bold">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
