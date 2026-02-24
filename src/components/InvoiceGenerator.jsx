@@ -259,9 +259,9 @@ const handleSave = (invoiceData) => {
     XLSX.writeFile(wb, `${docType}_${docNumber}.xlsx`);
   };
   const fetchHistory = async () => {
+    try {
     const userData = JSON.parse(localStorage.getItem('invoice_user'));
     const userEmail=userData?.email;
-  try {
     const response = await fetch('${API_BASE}/api/invoices?email=${userEmail}');
     if (response.ok) {
       const data = await response.json();
