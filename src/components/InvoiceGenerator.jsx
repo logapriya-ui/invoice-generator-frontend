@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { API_BASE } from './config';
+import { API_BASE } from '../config';
 import * as XLSX from 'xlsx';
 import { 
   Plus, Trash2, Download, Sun, Moon, 

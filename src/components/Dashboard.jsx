@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { API_BASE } from './config';
+import { API_BASE } from '../config';
 
 export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
