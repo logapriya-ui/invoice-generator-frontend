@@ -31,7 +31,8 @@ export default function InvoiceGenerator() {
   const [shipTo, setShipTo] = useState('');
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState('');
-  
+  //data base conntion in cloud
+  const API_BASE = import.meta.env.VITE_API_BASE;
   // Table Items
   const [items, setItems] = useState([{ id: Date.now(), desc: '', qty: 1, rate: 0 }]);
   const [tax, setTax] = useState(0);
@@ -165,7 +166,7 @@ useEffect(() => {
 
   // 2. Only if valid, proceed to fetch
   try {
-    const response = await fetch('http://localhost:5000/api/auth/signup', {
+    const response = await fetch('${API_BASE}/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password })
@@ -198,7 +199,7 @@ useEffect(() => {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/api/invoices', {
+    const response = await fetch('${API_BASE}/api/invoices', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invoiceData)
@@ -258,8 +259,10 @@ const handleSave = (invoiceData) => {
     XLSX.writeFile(wb, `${docType}_${docNumber}.xlsx`);
   };
   const fetchHistory = async () => {
+    const userData = JSON.parse(localStorage.getItem('invoice_user'));
+    const userEmail=userData?.email;
   try {
-    const response = await fetch('http://localhost:5000/api/invoices');
+    const response = await fetch('${API_BASE}/api/invoices?email=${userEmail}');
     if (response.ok) {
       const data = await response.json();
       setHistory(data);
