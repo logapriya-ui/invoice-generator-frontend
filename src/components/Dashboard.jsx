@@ -136,14 +136,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-black text-blue-900">PRO-INVOICE</h1>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
         </div>
-        <div className="mt-auto pt-10">
-    <button 
-        onClick={handleLogout}
-        className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-black transition-all"
-    >
-        LOGOUT ACCOUNT
-    </button>
-</div>
+        
 
         <div className="space-y-4">
           <input type="file" ref={fileInputRef} onChange={handleImportExcel} accept=".xlsx, .xls, .csv" className="hidden" />
@@ -171,7 +164,14 @@ export default function Dashboard() {
       <main className="flex-1 p-6 md:p-12 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl font-black text-slate-900 mb-8">My Documents</h2>
-          
+           <div className="mt-auto pt-10">
+    <button 
+        onClick={handleLogout}
+        className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-black transition-all"
+    >
+        LOGOUT ACCOUNT
+    </button>
+</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-blue-600 p-8 rounded-3xl text-white relative overflow-hidden group">
               <p className="text-xs font-bold opacity-80 uppercase">Total Documents</p>

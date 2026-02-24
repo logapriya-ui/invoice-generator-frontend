@@ -166,7 +166,7 @@ useEffect(() => {
 
   // 2. Only if valid, proceed to fetch
   try {
-    const response = await fetch('${API_BASE}/api/auth/signup', {
+    const response = await fetch(`${API_BASE}/api/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password })
@@ -199,7 +199,7 @@ useEffect(() => {
   };
 
   try {
-    const response = await fetch('${API_BASE}/api/invoices', {
+    const response = await fetch(`${API_BASE}/api/invoices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invoiceData)
@@ -262,7 +262,7 @@ const handleSave = (invoiceData) => {
     try {
     const userData = JSON.parse(localStorage.getItem('invoice_user'));
     const userEmail=userData?.email;
-    const response = await fetch('${API_BASE}/api/invoices?email=${userEmail}');
+    const response = await fetch(`${API_BASE}/api/invoices?email=${userEmail}`);
     if (response.ok) {
       const data = await response.json();
       setHistory(data);
