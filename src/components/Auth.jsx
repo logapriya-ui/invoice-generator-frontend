@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-const API_BASE = "https://invoice-generator-backend-5sfh.onrender.com";
+import { API_BASE } from './config';
 export default function Auth({ isLogin }) {
   const navigate = useNavigate();
   

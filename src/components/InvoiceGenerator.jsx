@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { API_BASE } from './config';
 import * as XLSX from 'xlsx';
 import { 
   Plus, Trash2, Download, Sun, Moon, 
@@ -32,7 +32,7 @@ export default function InvoiceGenerator() {
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState('');
   //data base conntion in cloud
-  const API_BASE = import.meta.env.VITE_API_BASE;
+  
   // Table Items
   const [items, setItems] = useState([{ id: Date.now(), desc: '', qty: 1, rate: 0 }]);
   const [tax, setTax] = useState(0);
