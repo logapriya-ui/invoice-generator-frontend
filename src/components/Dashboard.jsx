@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, Trash2, FileText, ChevronDown, 
   FileSpreadsheet, IndianRupee, Edit3, 
-  Store
+  Store ,X
 } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
