@@ -27,17 +27,17 @@ export default function Dashboard() {
   
   const fetchDashboardData = async () => {
     const email = user?.email;
-    const storeduser = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(localStorage.getItem('user'));
     console.log("user:",user);
     console.log("Email:",user?.email);
-    if (!storeduser || !storeduser.email)
+    if (!user || !user.email)
       {
         setLoading(false);
         return;
       } // Get user from login
     
   try {
-      const res = await fetch(`${API_BASE}/api/invoices?email=${storeduser.email}`);
+      const res = await fetch(`${API_BASE}/api/invoices?email=${user.email}`);
       const data = await res.json();
       // Assume backend handles sorting, or use .reverse() if needed
       setHistory(data);
