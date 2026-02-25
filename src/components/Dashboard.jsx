@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 
 export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
+  const user = JSON.parse(localStorage.getItem('user'));
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +28,7 @@ export default function Dashboard() {
   
   const fetchDashboardData = async () => {
     const email = user?.email;
-    const user = JSON.parse(localStorage.getItem('user'));
+    
     console.log("user:",user);
     console.log("Email:",user?.email);
     if (!user || !user.email)
