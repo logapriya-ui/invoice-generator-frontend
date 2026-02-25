@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, Trash2, FileText, ChevronDown, 
   FileSpreadsheet, IndianRupee, Edit3, 
-  Store ,X
+  Store ,X,LogOut
 } from 'lucide-react'; 
+
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 
@@ -40,6 +41,7 @@ export default function Dashboard() {
   try {
       const res = await fetch(`${API_BASE}/api/invoices?email=${user.email}`);
       const data = await res.json();
+      console.log("Fetched invoice",data);
       // Assume backend handles sorting, or use .reverse() if needed
       setHistory(data);
       setLoading(false);
@@ -140,12 +142,32 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      <aside className="w-full md:w-80 p-8 border-r bg-white shadow-sm h-screen sticky top-0">
+      <aside className=" relative w-full md:w-80 p-8 border-r bg-white shadow-sm h-screen sticky top-0">
         <div className="mb-10">
           <h1 className="text-2xl font-black text-blue-900">PRO-INVOICE</h1>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
         </div>
-        
+        <div className="absolute bottom-6 left-6 right-6">
+  <button
+    onClick={handleLogout}
+    className="w-full flex items-center justify-center gap-2 px-4 py-3 
+               bg-slate-100 hover:bg-red-50 
+               text-slate-600 hover:text-red-600 
+               rounded-xl text-sm font-semibold 
+               transition-all duration-200"
+  >
+    <LogOut size={16} />
+    Logout
+  </button>
+</div><div className="absolute bottom-24 left-6 right-6 text-center">
+  <p className="text-xs text-slate-400 font-semibold">
+    Signed in as
+  </p>
+  <p className="text-sm font-bold text-slate-700 truncate">
+    {user?.email}
+  </p>
+</div>
+
 
         <div className="space-y-4">
           <input type="file" ref={fileInputRef} onChange={handleImportExcel} accept=".xlsx, .xls, .csv" className="hidden" />
@@ -173,14 +195,7 @@ export default function Dashboard() {
       <main className="flex-1 p-6 md:p-12 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl font-black text-slate-900 mb-8">My Documents</h2>
-           <div className="mt-auto pt-10">
-    <button 
-        onClick={handleLogout}
-        className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-black transition-all"
-    >
-        LOGOUT ACCOUNT
-    </button>
-</div>
+           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-blue-600 p-8 rounded-3xl text-white relative overflow-hidden group">
               <p className="text-xs font-bold opacity-80 uppercase">Total Documents</p>
@@ -220,10 +235,12 @@ export default function Dashboard() {
                           <button 
                             onClick={(e) => handleStatusUpdate(doc._id, doc.status, e)}
                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
-                              doc.status === 'Paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 border border-red-200'
+                              doc.status?.toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 border border-red-200'
                             }`}
+
                           >
-                            {doc.status || 'Unpaid'}
+                            {doc.status ? doc.status: 'Unpaid'}
+                    
                           </button>
                         </td>
                         <td className="px-6 py-4 font-black text-blue-900 text-sm">#{doc.docNumber}</td>
