@@ -96,6 +96,7 @@ export default function Dashboard() {
     e.stopPropagation();
     const newStatus = currentStatus?.toLowerCase() === 'paid' ? 'Unpaid' : 'Paid'; // Toggle locally
     try {
+        console.log("Updating invoice ID:",id);
         const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
