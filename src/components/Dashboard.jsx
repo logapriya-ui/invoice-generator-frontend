@@ -5,7 +5,6 @@ import {
 } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import { API_BASE } from '../config';
 
 export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -18,13 +17,14 @@ export default function Dashboard() {
   const fileInputRef = useRef(null);
   
   // Use environment variable for production, fallback to local for dev
-  
+  const API_BASE = import.meta.env.VITE_API_BASE;
 
   // --- FETCH DATA ---
   useEffect(() => {
     fetchDashboardData();
   }, []);
-
+  console.log("user:",user);
+  console.log("Email:",user?.email);
   const fetchDashboardData = async () => {
     const user = JSON.parse(localStorage.getItem('user')); // Get user from login
     const email = user?.email;
