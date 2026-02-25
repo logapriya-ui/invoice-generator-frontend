@@ -94,8 +94,7 @@ export default function Dashboard() {
   // --- STATUS TOGGLE ---
   const handleStatusUpdate = async (id, currentStatus, e) => {
     e.stopPropagation();
-    const newStatus = currentStatus === 'Paid' ? 'Unpaid' : 'Paid'; // Toggle locally
-    
+    const newStatus = currentStatus?.toLowerCase() === 'paid' ? 'Unpaid' : 'Paid'; // Toggle locally
     try {
         const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
             method: 'PATCH',
