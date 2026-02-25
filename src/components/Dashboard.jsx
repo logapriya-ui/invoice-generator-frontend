@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, Trash2, FileText, ChevronDown, 
-  FileSpreadsheet, IndianRupee, Edit3 
+  FileSpreadsheet, IndianRupee, Edit3, 
+  Store
 } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
@@ -23,14 +24,20 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
-  console.log("user:",user);
-  console.log("Email:",user?.email);
+  
   const fetchDashboardData = async () => {
-    const user = JSON.parse(localStorage.getItem('user')); // Get user from login
     const email = user?.email;
-    if(!email) return;
+    const storeduser = JSON.parse(localStorage.getItem('user'));
+    console.log("user:",user);
+    console.log("Email:",user?.email);
+    if (!storeduser || !storeduser.email)
+      {
+        setLoading(false);
+        return;
+      } // Get user from login
+    
   try {
-      const res = await fetch(`${API_BASE}/api/invoices?email=${user.email}`);
+      const res = await fetch(`${API_BASE}/api/invoices?email=${storeduser.email}`);
       const data = await res.json();
       // Assume backend handles sorting, or use .reverse() if needed
       setHistory(data);
