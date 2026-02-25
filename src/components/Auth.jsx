@@ -39,8 +39,9 @@ export default function Auth({ isLogin }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
+      
       const data = await response.json();
+      console.log(data);
 
       if (response.ok) {
       if (!isLogin) {
@@ -49,7 +50,7 @@ export default function Auth({ isLogin }) {
         navigate('/login');
       } else {
         // SUCCESSFUL LOGIN -> Go to Dashboard
-        localStorage.setItem('invoice_user', JSON.stringify(data.user));
+        localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       }
     } else {
