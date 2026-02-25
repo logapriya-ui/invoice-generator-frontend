@@ -145,9 +145,7 @@ export default function Dashboard() {
       <aside className=" relative w-full md:w-80 p-8 border-r bg-white shadow-sm h-screen sticky top-0">
         <div className="mb-10">
           <h1 className="text-2xl font-black text-blue-900">PRO-INVOICE</h1>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
-        </div>
-        <div className="absolute bottom-6 left-6 right-6">
+          <div className="absolute bottom-6 left-6 right-6">
   <button
     onClick={handleLogout}
     className="w-full flex items-center justify-center gap-2 px-4 py-3 
@@ -167,6 +165,9 @@ export default function Dashboard() {
     {user?.email}
   </p>
 </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Business Dashboard</p>
+        </div>
+        
 
 
         <div className="space-y-4">
