@@ -100,7 +100,7 @@ export default function Dashboard() {
     try
     { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
-     body: JSON.stringify({ status: Paid }), } ); 
+     body: JSON.stringify({ status: "Paid"}), } ); 
     console.log("Response status:", res.status); 
    }
 
