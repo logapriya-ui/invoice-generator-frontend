@@ -92,27 +92,22 @@ export default function Dashboard() {
   };
 
   // --- STATUS TOGGLE ---
-  const handleStatusUpdate = async (id, currentStatus, e) => {
-    e.stopPropagation();
-    const newStatus = currentStatus?.toLowerCase() === 'paid' ? 'Unpaid' : 'Paid'; // Toggle locally
-    try {
-        console.log("Updating invoice ID:",id);
-        const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: newStatus }) //
-        });
-          
-        if (res.ok) {
-            // Update the history state immediately so the UI changes
-            setHistory(prev => prev.map(inv => 
-                inv._id === id ? { ...inv, status: newStatus } : inv
-            ));
-        }
-    } catch (err) {
-        console.error("Status Update Error:", err); //
-    }
-};
+  const handleStatusUpdate = async (id, currentStatus, e) => 
+  
+{ if (e) e.stopPropagation(); console.log("🔥 BUTTON CLICKED"); 
+  console.log("Updating invoice ID:", id); 
+  const newStatus = currentStatus?.toLowerCase() === "paid" ? "Unpaid" : "Paid"; 
+  try
+   { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
+    { method: "PATCH", headers: { "Content-Type": "application/json", },
+   body: JSON.stringify({ status: newStatus }), } ); 
+   console.log("Response status:", res.status); 
+   if (res.ok) 
+    { setHistory((prev) => prev.map((inv) => inv._id === id ? 
+    { ...inv, status: newStatus } : inv ) ); } } 
+
+  catch (err) {
+   console.error("Status Update Error:", err); } };
   // --- EXCEL & NAVIGATION ---
   const handleCreate = (type) => {
     navigate('/generator', { state: { type: type } });
@@ -235,11 +230,13 @@ export default function Dashboard() {
                       <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
                           <button type="button"
-                            onClick={(e) => {e.stopPropagation();alert("working");}}
-                            
+                            onClick={(e) => handleStatusUpdate(doc._id, doc.status, e)}
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
+                              doc.status?.toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 border border-red-200'
+                            }`}
 
                           >
-                            Test
+                            {doc.status ? doc.status: 'Unpaid'}
                     
                           </button>
                         </td>
