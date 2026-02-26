@@ -92,19 +92,21 @@ export default function Dashboard() {
   };
 
   // --- STATUS TOGGLE ---
-  const handleStatusUpdate = async (id) => 
+  const handleStatusUpdate = async (id,currentStatus,e) => 
   {
-
+    e.stopPropagation();
     console.log("🔥 function started"); 
     console.log("Updating invoice ID:", id)
-    const newStatus = currentStatus.toLowerCase()=== "paid" ? "Unpaid" : "Paid"
+    const newStatus = currentStatus && currentStatus.toLowerCase() === "paid" ? "Unpaid" : "Paid"
     try
     { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
      body: JSON.stringify({ status: newStatus}), } ); 
-    console.log("Response status:", res.status); 
+    
+   if(res.ok){
+   setHistory(prev => prev.map(inv => inv._id === id ? {...inv, status :newStatus } :inv));
    }
-
+  }
      catch (err) {
        console.error("Status Update Error:", err); } };
   // --- EXCEL & NAVIGATION ---
@@ -228,7 +230,7 @@ export default function Dashboard() {
                     {history.map((doc) => (
                       <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
-                          <button type="button" onClick={() => handleStatusUpdate(doc._id,doc.status)}>
+                          <button type="button" onClick={(e) => handleStatusUpdate(doc._id,doc.status,e)}>
                             {doc.status? doc.status : "Unpaid"}
                             </button>
                         </td>
