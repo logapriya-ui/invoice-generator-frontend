@@ -95,17 +95,22 @@ export default function Dashboard() {
   const handleStatusUpdate = async (id,currentStatus,e) => 
   {
     e.stopPropagation();
-    console.log("🔥 function started"); 
+    console.log("🔥 function started -step-1"); 
     console.log("Updating invoice ID:", id);
     console.log("Current Status:",currentStatus);
     console.log("API_BASE", API_BASE);
     console.log("Full URL",`${API_BASE}/api/invoices/${id}`);
-    const newStatus = currentStatus && currentStatus.toLowerCase() === "paid" ? "Unpaid" : "Paid"
+    
     try
-    { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
+    {
+      console.log("step-2");
+      const newStatus = currentStatus && currentStatus.toLowerCase() === "paid" ? "Unpaid" : "Paid";
+      console.log("step-3 New Status",newStatus);
+      console.log("step-4 before fetch");
+      const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
      body: JSON.stringify({ status: newStatus}), } ); 
-    
+     console.log("step-5 after fetch",res.status);
    if(res.ok){
    setHistory(prev => prev.map(inv => inv._id === id ? {...inv, status :newStatus } :inv));
    }
