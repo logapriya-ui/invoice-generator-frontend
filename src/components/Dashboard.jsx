@@ -94,17 +94,18 @@ export default function Dashboard() {
   // --- STATUS TOGGLE ---
   const handleStatusUpdate = async (id) => 
   {
-   console.log("🔥 function started"); 
-  console.log("Updating invoice ID:", id);  
-  try
-   { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
+
+    console.log("🔥 function started"); 
+    console.log("Updating invoice ID:", id)
+    try
+    { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
      body: JSON.stringify({ status: Paid }), } ); 
     console.log("Response status:", res.status); 
    }
 
-  catch (err) {
-   console.error("Status Update Error:", err); } };
+     catch (err) {
+       console.error("Status Update Error:", err); } };
   // --- EXCEL & NAVIGATION ---
   const handleCreate = (type) => {
     navigate('/generator', { state: { type: type } });
