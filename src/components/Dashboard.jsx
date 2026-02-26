@@ -7,7 +7,7 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-console.log("API_BASE:",API_BASE);
+
 export default function Dashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
   const user = JSON.parse(localStorage.getItem('user'));
