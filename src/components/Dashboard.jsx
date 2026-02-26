@@ -95,13 +95,12 @@ export default function Dashboard() {
   const handleStatusUpdate = async (id) => 
   {
    console.log("🔥 function started"); 
-  console.log("Updating invoice ID:", id); 
-  const newStatus = currentStatus?.toLowerCase() === "paid" ? "Unpaid" : "Paid"; 
+  console.log("Updating invoice ID:", id);  
   try
    { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
-   body: JSON.stringify({ status: Paid }), } ); 
-   console.log("Response status:", res.status); 
+     body: JSON.stringify({ status: Paid }), } ); 
+    console.log("Response status:", res.status); 
    }
 
   catch (err) {
