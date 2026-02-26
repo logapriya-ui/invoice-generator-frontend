@@ -92,19 +92,17 @@ export default function Dashboard() {
   };
 
   // --- STATUS TOGGLE ---
-  const handleStatusUpdate = async (id, currentStatus, e) => 
+  const handleStatusUpdate = async (id) => 
   
-{ if (e) e.stopPropagation(); console.log("🔥 BUTTON CLICKED"); 
+ console.log("🔥 function started"); 
   console.log("Updating invoice ID:", id); 
   const newStatus = currentStatus?.toLowerCase() === "paid" ? "Unpaid" : "Paid"; 
   try
    { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
     { method: "PATCH", headers: { "Content-Type": "application/json", },
-   body: JSON.stringify({ status: newStatus }), } ); 
+   body: JSON.stringify({ status: Paid }), } ); 
    console.log("Response status:", res.status); 
-   if (res.ok) 
-    { setHistory((prev) => prev.map((inv) => inv._id === id ? 
-    { ...inv, status: newStatus } : inv ) ); } } 
+   }
 
   catch (err) {
    console.error("Status Update Error:", err); } };
@@ -229,9 +227,7 @@ export default function Dashboard() {
                     {history.map((doc) => (
                       <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
-                          <button type="button" onClick={(e) => { console.log("INLINE CLICK WORKS"); 
-                          fetch("https://invoice-generator-backend-5sfh.onrender.com/api/invoices") .then(res => console.log("FETCH TRIGGERED", res.status)) .catch(err => console.error("ERROR", err)); }} >
-                           Direct Test </button>
+                          <button type="button" onClick={() => handleStatusUpdate(doc._id)}>Test Patch</button>)
                         </td>
                         <td className="px-6 py-4 font-black text-blue-900 text-sm">#{doc.docNumber}</td>
                         <td className="px-6 py-4 text-sm font-bold text-slate-600">{doc.clientName}</td>
