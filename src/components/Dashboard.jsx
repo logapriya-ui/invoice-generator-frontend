@@ -227,7 +227,8 @@ export default function Dashboard() {
                     {history.map((doc) => (
                       <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
-                          <button type="button" onClick={() => handleStatusUpdate(doc._id)}>Test Patch</button>)
+                          <button type="button" onClick={() => handleStatusUpdate(doc._id)}>Test Patch
+                            </button>
                         </td>
                         <td className="px-6 py-4 font-black text-blue-900 text-sm">#{doc.docNumber}</td>
                         <td className="px-6 py-4 text-sm font-bold text-slate-600">{doc.clientName}</td>
