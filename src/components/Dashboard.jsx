@@ -93,8 +93,8 @@ export default function Dashboard() {
 
   // --- STATUS TOGGLE ---
   const handleStatusUpdate = async (id) => 
-  
- console.log("🔥 function started"); 
+  {
+   console.log("🔥 function started"); 
   console.log("Updating invoice ID:", id); 
   const newStatus = currentStatus?.toLowerCase() === "paid" ? "Unpaid" : "Paid"; 
   try
