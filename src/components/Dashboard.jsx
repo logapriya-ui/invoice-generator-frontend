@@ -96,7 +96,9 @@ export default function Dashboard() {
   {
     e.stopPropagation();
     console.log("🔥 function started"); 
-    console.log("Updating invoice ID:", id)
+    console.log("Updating invoice ID:", id);
+    console.log("Current Status:",currentStatus);
+
     const newStatus = currentStatus && currentStatus.toLowerCase() === "paid" ? "Unpaid" : "Paid"
     try
     { const res = await fetch( `https://invoice-generator-backend-5sfh.onrender.com/api/invoices/${id}`, 
