@@ -234,7 +234,7 @@ export default function Dashboard() {
                     {history.map((doc) => (
                       <tr key={doc._id} className="hover:bg-blue-50/30 transition-colors group cursor-default">
                         <td className="px-6 py-4">
-                          <button 
+                          <button type="button"
                             onClick={(e) => handleStatusUpdate(doc._id, doc.status, e)}
                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ${
                               doc.status?.toLowerCase() === 'paid' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600 border border-red-200'
