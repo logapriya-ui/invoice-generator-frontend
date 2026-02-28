@@ -184,7 +184,7 @@ useEffect(() => {
   setIsSaving(true);
   
   // 1. Get the real logged-in user from localStorage
-  const userData = JSON.parse(localStorage.getItem('invoice_user'));
+  const userData = JSON.parse(localStorage.getItem('user'));
   const userEmail = userData ? userData.email : "guest@example.com";
 
   const invoiceData = {
