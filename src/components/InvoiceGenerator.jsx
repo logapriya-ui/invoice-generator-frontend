@@ -116,11 +116,44 @@ export default function InvoiceGenerator() {
   const balanceDue = total - Number(amountPaid);
 
   // --- ACTIONS ---
-  const sendEmail = () => {
-    const subject = encodeURIComponent(`${docType} #${docNumber} from ${senderDetails.split('\n')[0]}`);
-    const body = encodeURIComponent(`Hello,\n\nPlease find the ${docType} attached.\nTotal Amount: ${currency}${total.toLocaleString()}\n\nRegards,\n${senderDetails.split('\n')[0]}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  const sendEmail = async () => {
+  // ✅ REPLACE THESE 3 VALUES with yours from EmailJS dashboard
+  const SERVICE_ID  = 'service_l0534se';   // Your EmailJS Service ID
+  const TEMPLATE_ID = 'template_oqrgxtn';  // Your EmailJS Template ID
+  const PUBLIC_KEY  = 'kOD0dHKCSL7BgC98g';  // Your EmailJS Public Key
+
+  // Get client email from billTo field (first line should be email or name)
+  const clientEmail = prompt("Enter client's email address to send invoice:");
+  if (!clientEmail) return;
+
+  // Validate email format
+  if (!clientEmail.includes('@')) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  const templateParams = {
+    to_email:    clientEmail,
+    client_name: billTo.split('\n')[0] || 'Client',
+    sender_name: senderDetails.split('\n')[0] || 'Your Company',
+    doc_type:    docType,
+    doc_number:  docNumber,
+    date:        date,
+    total:       `${currency}${total.toLocaleString()}`,
+    balance_due: `${currency}${balanceDue.toLocaleString()}`,
   };
+
+  try {
+    setIsSaving(true);
+    await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY);
+    alert(`✅ Invoice email sent successfully to ${clientEmail}!`);
+  } catch (err) {
+    console.error("EmailJS Error:", err);
+    alert("❌ Failed to send email. Check your EmailJS Service/Template/Key IDs.");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const saveAsTemplate = () => {
     const templateData = { logo, senderDetails, gstNumber };
